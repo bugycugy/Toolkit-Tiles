@@ -1,14 +1,11 @@
 package com.wstxda.toolkit.manager.caffeine
 
 import android.content.Context
+import com.wstxda.toolkit.base.SingletonHolder
 
 object CaffeineModule {
-    @Volatile
-    private var instance: CaffeineManager? = null
 
-    fun getInstance(context: Context): CaffeineManager {
-        return instance ?: synchronized(this) {
-            instance ?: CaffeineManager(context.applicationContext).also { instance = it }
-        }
-    }
+    private val holder = SingletonHolder(::CaffeineManager)
+
+    fun getInstance(context: Context) = holder.getInstance(context)
 }

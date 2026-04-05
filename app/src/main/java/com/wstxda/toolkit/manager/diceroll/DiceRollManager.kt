@@ -32,10 +32,10 @@ class DiceRollManager(context: Context) {
         animationJob = managerScope.launch {
             _isRolling.value = true
 
-            val finalRoll = Random.Default.nextInt(1, 7)
+            val finalRoll = Random.nextInt(1, 7)
 
             for (i in 0 until 12) {
-                _currentRoll.value = Random.Default.nextInt(1, 7)
+                _currentRoll.value = Random.nextInt(1, 7)
                 haptics.tick()
                 delay(60L + (i * 30))
             }

@@ -1,14 +1,11 @@
 package com.wstxda.toolkit.manager.counter
 
 import android.content.Context
+import com.wstxda.toolkit.base.SingletonHolder
 
 object CounterModule {
-    @Volatile
-    private var instance: CounterManager? = null
 
-    fun getInstance(context: Context): CounterManager {
-        return instance ?: synchronized(this) {
-            instance ?: CounterManager(context.applicationContext).also { instance = it }
-        }
-    }
+    private val holder = SingletonHolder(::CounterManager)
+
+    fun getInstance(context: Context) = holder.getInstance(context)
 }

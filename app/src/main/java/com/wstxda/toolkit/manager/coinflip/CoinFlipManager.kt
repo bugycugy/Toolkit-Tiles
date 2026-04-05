@@ -16,7 +16,7 @@ class CoinFlipManager {
     val lastFlip = _lastFlip.asStateFlow()
 
     fun flip() {
-        val side = if (Random.Default.nextBoolean()) CoinFlipSide.HEADS else CoinFlipSide.TAILS
+        val side = if (Random.nextBoolean()) CoinFlipSide.HEADS else CoinFlipSide.TAILS
         _lastFlip.value = side
 
         if (side == CoinFlipSide.HEADS) {

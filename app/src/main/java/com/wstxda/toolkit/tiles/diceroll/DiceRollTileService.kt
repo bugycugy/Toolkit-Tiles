@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 class DiceRollTileService : BaseTileService() {
 
     private val diceRollManager by lazy { DiceRollManager(applicationContext) }
-    private val diceRollLabelProvider by lazy { DiceRollLabelProvider(applicationContext) }
-    private val diceRollIconProvider by lazy { DiceRollIconProvider(applicationContext) }
+    private val labelProvider by lazy { DiceRollLabelProvider(applicationContext) }
+    private val iconProvider by lazy { DiceRollIconProvider(applicationContext) }
 
     override fun onStopListening() {
         super.onStopListening()
@@ -20,11 +20,13 @@ class DiceRollTileService : BaseTileService() {
 
     override fun onClick() {
         diceRollManager.roll()
+        updateTile()
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(diceRollManager.currentRoll, diceRollManager.isRolling)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        diceRollManager.currentRoll,
+        diceRollManager.isRolling,
+    )
 
     override fun updateTile() {
         val currentRoll = diceRollManager.currentRoll.value
@@ -32,9 +34,9 @@ class DiceRollTileService : BaseTileService() {
 
         setTileState(
             state = if (currentRoll != null) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE,
-            label = diceRollLabelProvider.getLabel(currentRoll),
-            subtitle = diceRollLabelProvider.getSubtitle(isRolling),
-            icon = diceRollIconProvider.getIcon(currentRoll)
+            label = labelProvider.getLabel(currentRoll),
+            subtitle = labelProvider.getSubtitle(isRolling),
+            icon = iconProvider.getIcon(currentRoll),
         )
     }
 }

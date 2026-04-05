@@ -50,7 +50,7 @@ class LuxMeterManager(context: Context) : SensorEventListener {
 
     private fun registerSensor() {
         if (lightSensor != null && !isSensorRegistered) {
-            sensorManager?.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_UI)
+            sensorManager?.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
             isSensorRegistered = true
         }
     }

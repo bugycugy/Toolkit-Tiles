@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 class CoinFlipTileService : BaseTileService() {
 
     private val coinFlipManager by lazy { CoinFlipManager() }
-    private val coinFlipLabelProvider by lazy { CoinFlipLabelProvider(applicationContext) }
-    private val coinFlipIconProvider by lazy { CoinFlipIconProvider(applicationContext) }
+    private val labelProvider by lazy { CoinFlipLabelProvider(applicationContext) }
+    private val iconProvider by lazy { CoinFlipIconProvider(applicationContext) }
 
     override fun onStopListening() {
         super.onStopListening()
@@ -20,13 +20,14 @@ class CoinFlipTileService : BaseTileService() {
 
     override fun onClick() {
         coinFlipManager.flip()
+        updateTile()
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(
-            coinFlipManager.lastFlip, coinFlipManager.headsCount, coinFlipManager.tailsCount
-        )
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        coinFlipManager.lastFlip,
+        coinFlipManager.headsCount,
+        coinFlipManager.tailsCount,
+    )
 
     override fun updateTile() {
         val lastFlip = coinFlipManager.lastFlip.value
@@ -35,9 +36,9 @@ class CoinFlipTileService : BaseTileService() {
 
         setTileState(
             state = if (lastFlip != null) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE,
-            label = coinFlipLabelProvider.getLabel(lastFlip),
-            subtitle = coinFlipLabelProvider.getSubtitle(lastFlip, heads, tails),
-            icon = coinFlipIconProvider.getIcon(lastFlip)
+            label = labelProvider.getLabel(lastFlip),
+            subtitle = labelProvider.getSubtitle(lastFlip, heads, tails),
+            icon = iconProvider.getIcon(lastFlip),
         )
     }
 }

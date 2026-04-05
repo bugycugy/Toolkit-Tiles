@@ -1,14 +1,11 @@
 package com.wstxda.toolkit.manager.memory
 
 import android.content.Context
+import com.wstxda.toolkit.base.SingletonHolder
 
 object MemoryModule {
-    @Volatile
-    private var instance: MemoryManager? = null
 
-    fun getInstance(context: Context): MemoryManager {
-        return instance ?: synchronized(this) {
-            instance ?: MemoryManager(context.applicationContext).also { instance = it }
-        }
-    }
+    private val holder = SingletonHolder(::MemoryManager)
+
+    fun getInstance(context: Context) = holder.getInstance(context)
 }

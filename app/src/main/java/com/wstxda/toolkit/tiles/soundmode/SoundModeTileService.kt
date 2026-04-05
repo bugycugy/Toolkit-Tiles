@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 class SoundModeTileService : BaseTileService() {
 
     private val soundModeManager by lazy { SoundModeManager(applicationContext) }
-    private val soundModeLabelProvider by lazy { SoundModeLabelProvider(applicationContext) }
-    private val soundModeIconProvider by lazy { SoundModeIconProvider(applicationContext) }
+    private val labelProvider by lazy { SoundModeLabelProvider(applicationContext) }
+    private val iconProvider by lazy { SoundModeIconProvider(applicationContext) }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -22,24 +22,25 @@ class SoundModeTileService : BaseTileService() {
     override fun onClick() {
         if (soundModeManager.hasPermission()) {
             soundModeManager.cycleMode()
+            updateTile()
         } else {
             startActivityAndCollapse(NotificationPolicyPermissionActivity::class.java)
         }
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(soundModeManager.currentMode)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        soundModeManager.currentMode,
+    )
 
     override fun updateTile() {
         val hasPermission = soundModeManager.hasPermission()
-        val mode = soundModeManager.currentMode.value
+        val mode = soundModeManager.getCurrentModeInternal()
 
         setTileState(
             state = if (hasPermission) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE,
-            label = soundModeLabelProvider.getLabel(mode, hasPermission),
-            subtitle = soundModeLabelProvider.getSubtitle(hasPermission),
-            icon = soundModeIconProvider.getIcon(mode, hasPermission)
+            label = labelProvider.getLabel(mode, hasPermission),
+            subtitle = labelProvider.getSubtitle(hasPermission),
+            icon = iconProvider.getIcon(mode, hasPermission),
         )
     }
 }

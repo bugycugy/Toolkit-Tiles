@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.Flow
 class BatteryTileService : BaseTileService() {
 
     private val batteryManager by lazy { BatteryModule.getInstance(applicationContext) }
-    private val batteryLabelProvider by lazy { BatteryLabelProvider(applicationContext) }
-    private val batteryIconProvider by lazy { BatteryIconProvider(applicationContext) }
+    private val labelProvider by lazy { BatteryLabelProvider(applicationContext) }
+    private val iconProvider by lazy { BatteryIconProvider(applicationContext) }
 
     override fun onStartListening() {
-        super.onStartListening()
         batteryManager.setListening(true)
+        super.onStartListening()
     }
 
     override fun onStopListening() {
@@ -25,24 +25,23 @@ class BatteryTileService : BaseTileService() {
 
     override fun onClick() {
         batteryManager.toggle()
+        updateTile()
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(
-            batteryManager.batteryInfo,
-            batteryManager.displayState,
-        )
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        batteryManager.batteryInfo,
+        batteryManager.displayState,
+    )
 
     override fun updateTile() {
         val info = batteryManager.batteryInfo.value
-        val state = batteryManager.displayState.value
+        val displayState = batteryManager.displayState.value
 
         setTileState(
             state = if (info.isCharging) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE,
-            label = batteryLabelProvider.getLabel(info, state),
-            subtitle = batteryLabelProvider.getSubtitle(info, state),
-            icon = batteryIconProvider.getIcon(info),
+            label = labelProvider.getLabel(info, displayState),
+            subtitle = labelProvider.getSubtitle(info, displayState),
+            icon = iconProvider.getIcon(info),
         )
     }
 }

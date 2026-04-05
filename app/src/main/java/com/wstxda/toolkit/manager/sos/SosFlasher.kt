@@ -11,13 +11,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.coroutineContext
 
 class SosFlasher(context: Context) {
 
@@ -115,11 +115,11 @@ class SosFlasher(context: Context) {
     }
 
     private suspend fun sendS() = repeat(3) {
-        if (coroutineContext.isActive) dot()
+        if (currentCoroutineContext().isActive) dot()
     }
 
     private suspend fun sendO() = repeat(3) {
-        if (coroutineContext.isActive) dash()
+        if (currentCoroutineContext().isActive) dash()
     }
 
     private suspend fun dot() {
@@ -133,7 +133,7 @@ class SosFlasher(context: Context) {
     }
 
     private suspend fun blink(duration: Long) {
-        if (!coroutineContext.isActive) return
+        if (!currentCoroutineContext().isActive) return
         setTorch(true)
         haptics.long(duration)
         delay(duration)

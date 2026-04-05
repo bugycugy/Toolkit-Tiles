@@ -27,8 +27,8 @@ class MemoryManager(context: Context) {
     private val appContext = context.applicationContext
     private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val activityManager = appContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    private val memoryInfo = ActivityManager.MemoryInfo()
+    private val activityManager =
+        appContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
     private val _currentState = MutableStateFlow(MemoryState.RAM)
     val currentState = _currentState.asStateFlow()
@@ -48,38 +48,31 @@ class MemoryManager(context: Context) {
     init {
         val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val savedStateName = prefs.getString(KEY_STATE, MemoryState.RAM.name)
-        val savedState = runCatching { MemoryState.valueOf(savedStateName!!) }.getOrNull()
-        _currentState.value = savedState ?: MemoryState.RAM
+        _currentState.value = runCatching {
+            MemoryState.valueOf(savedStateName!!)
+        }.getOrDefault(MemoryState.RAM)
     }
 
     fun toggle() {
         val nextState =
             if (_currentState.value == MemoryState.RAM) MemoryState.STORAGE else MemoryState.RAM
         _currentState.value = nextState
+
         appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit {
             putString(KEY_STATE, nextState.name)
         }
 
-        updateData()
+        managerScope.launch { updateData() }
     }
 
     fun setListening(listening: Boolean) {
         if (isPanelOpen == listening) return
         isPanelOpen = listening
-        updatePollingState()
-    }
-
-    private fun updatePollingState() {
-        if (isPanelOpen) {
-            startPolling()
-        } else {
-            stopPolling()
-        }
+        if (isPanelOpen) startPolling() else stopPolling()
     }
 
     private fun startPolling() {
         if (pollingJob?.isActive == true) return
-
         pollingJob = managerScope.launch {
             updateData()
             while (isActive) {
@@ -106,6 +99,7 @@ class MemoryManager(context: Context) {
     }
 
     private fun updateRamInfo() {
+        val memoryInfo = ActivityManager.MemoryInfo()
         activityManager.getMemoryInfo(memoryInfo)
 
         val totalBytes = memoryInfo.totalMem

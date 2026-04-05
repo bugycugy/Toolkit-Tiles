@@ -36,6 +36,7 @@ class NetworkTrafficManager(context: Context) {
     private var pollingJob: Job? = null
     private var isPanelOpen = false
 
+    // Mutable sample state — confined to managerScope (IO) only.
     private var lastRxBytes = TrafficStats.UNSUPPORTED.toLong()
     private var lastTxBytes = TrafficStats.UNSUPPORTED.toLong()
     private var lastSampleTime = 0L
@@ -43,10 +44,9 @@ class NetworkTrafficManager(context: Context) {
     init {
         val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val savedStateName = prefs.getString(KEY_STATE, NetworkTrafficState.DOWNLOAD.name)
-        val savedState = runCatching {
+        _currentState.value = runCatching {
             NetworkTrafficState.valueOf(savedStateName!!)
-        }.getOrNull()
-        _currentState.value = savedState ?: NetworkTrafficState.DOWNLOAD
+        }.getOrDefault(NetworkTrafficState.DOWNLOAD)
     }
 
     fun toggle() {
@@ -59,28 +59,19 @@ class NetworkTrafficManager(context: Context) {
         appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit {
             putString(KEY_STATE, nextState.name)
         }
-        resetSamples()
-        updateData()
+        restartPolling()
     }
 
     fun setListening(listening: Boolean) {
         if (isPanelOpen == listening) return
         isPanelOpen = listening
-        updatePollingState()
+        if (isPanelOpen) restartPolling() else stopPolling()
     }
 
-    private fun updatePollingState() {
-        if (isPanelOpen) {
-            resetSamples()
-            startPolling()
-        } else {
-            stopPolling()
-        }
-    }
-
-    private fun startPolling() {
-        if (pollingJob?.isActive == true) return
+    private fun restartPolling() {
+        pollingJob?.cancel()
         pollingJob = managerScope.launch {
+            resetSamples()
             updateData()
             while (isActive) {
                 delay(REFRESH_RATE_MS)
@@ -92,11 +83,13 @@ class NetworkTrafficManager(context: Context) {
     private fun stopPolling() {
         pollingJob?.cancel()
         pollingJob = null
+        _speedValue.value = ""
     }
 
     private fun resetSamples() {
-        lastRxBytes = TrafficStats.UNSUPPORTED.toLong()
-        lastTxBytes = TrafficStats.UNSUPPORTED.toLong()
+        val unsupported = TrafficStats.UNSUPPORTED.toLong()
+        lastRxBytes = unsupported
+        lastTxBytes = unsupported
         lastSampleTime = 0L
     }
 
@@ -105,18 +98,21 @@ class NetworkTrafficManager(context: Context) {
             val now = System.currentTimeMillis()
             val rxBytes = TrafficStats.getTotalRxBytes()
             val txBytes = TrafficStats.getTotalTxBytes()
+            val unsupported = TrafficStats.UNSUPPORTED.toLong()
 
-            val speedBytes: Long =
-                if (lastSampleTime > 0 && rxBytes != TrafficStats.UNSUPPORTED.toLong() && txBytes != TrafficStats.UNSUPPORTED.toLong()) {
-                    val elapsed = (now - lastSampleTime).coerceAtLeast(1L)
-                    val delta = when (_currentState.value) {
-                        NetworkTrafficState.DOWNLOAD -> (rxBytes - lastRxBytes).coerceAtLeast(0L)
-                        NetworkTrafficState.UPLOAD -> (txBytes - lastTxBytes).coerceAtLeast(0L)
-                    }
-                    (delta * 1000L) / elapsed
-                } else {
-                    0L
+            val isValidSample =
+                lastSampleTime > 0 && rxBytes != unsupported && txBytes != unsupported
+
+            val speedBytes: Long = if (isValidSample) {
+                val elapsed = (now - lastSampleTime).coerceAtLeast(1L)
+                val delta = when (_currentState.value) {
+                    NetworkTrafficState.DOWNLOAD -> (rxBytes - lastRxBytes).coerceAtLeast(0L)
+                    NetworkTrafficState.UPLOAD -> (txBytes - lastTxBytes).coerceAtLeast(0L)
                 }
+                (delta * 1000L) / elapsed
+            } else {
+                0L
+            }
 
             lastRxBytes = rxBytes
             lastTxBytes = txBytes
@@ -133,11 +129,9 @@ class NetworkTrafficManager(context: Context) {
             bytesPerSecond >= BYTES_IN_MB -> appContext.getString(
                 R.string.network_traffic_speed_mbs, bytesPerSecond.toFloat() / BYTES_IN_MB
             )
-
             bytesPerSecond >= BYTES_IN_KB -> appContext.getString(
                 R.string.network_traffic_speed_kbs, bytesPerSecond / BYTES_IN_KB
             )
-
             else -> appContext.getString(
                 R.string.network_traffic_speed_bs, bytesPerSecond
             )

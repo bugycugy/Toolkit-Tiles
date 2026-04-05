@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 class BreathingTileService : BaseTileService() {
 
     private val breathingManager by lazy { BreathingManager(applicationContext) }
-    private val breathingLabelProvider by lazy { BreathingLabelProvider(applicationContext) }
-    private val breathingIconProvider by lazy { BreathingIconProvider(applicationContext) }
+    private val labelProvider by lazy { BreathingLabelProvider(applicationContext) }
+    private val iconProvider by lazy { BreathingIconProvider(applicationContext) }
 
     override fun onStopListening() {
         super.onStopListening()
@@ -26,11 +26,12 @@ class BreathingTileService : BaseTileService() {
 
     override fun onClick() {
         breathingManager.toggle()
+        updateTile()
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(breathingManager.breathingState)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        breathingManager.breathingState,
+    )
 
     override fun updateTile() {
         val state = breathingManager.breathingState.value
@@ -38,9 +39,9 @@ class BreathingTileService : BaseTileService() {
 
         setTileState(
             state = if (isIdle) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE,
-            label = breathingLabelProvider.getLabel(state.phase),
-            subtitle = breathingLabelProvider.getSubtitle(state.phase),
-            icon = breathingIconProvider.getIcon(state.phase, state.progress)
+            label = labelProvider.getLabel(state.phase),
+            subtitle = labelProvider.getSubtitle(state.phase),
+            icon = iconProvider.getIcon(state.phase, state.progress),
         )
     }
 }

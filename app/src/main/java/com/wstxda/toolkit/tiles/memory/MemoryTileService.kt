@@ -2,7 +2,6 @@ package com.wstxda.toolkit.tiles.memory
 
 import android.service.quicksettings.Tile
 import com.wstxda.toolkit.base.BaseTileService
-import com.wstxda.toolkit.manager.memory.MemoryManager
 import com.wstxda.toolkit.manager.memory.MemoryModule
 import com.wstxda.toolkit.ui.icon.MemoryIconProvider
 import com.wstxda.toolkit.ui.label.MemoryLabelProvider
@@ -10,13 +9,13 @@ import kotlinx.coroutines.flow.Flow
 
 class MemoryTileService : BaseTileService() {
 
-    private val memoryManager: MemoryManager by lazy { MemoryModule.getInstance(applicationContext) }
-    private val memoryLabelProvider by lazy { MemoryLabelProvider(applicationContext) }
-    private val memoryIconProvider by lazy { MemoryIconProvider(applicationContext) }
+    private val memoryManager by lazy { MemoryModule.getInstance(applicationContext) }
+    private val labelProvider by lazy { MemoryLabelProvider(applicationContext) }
+    private val iconProvider by lazy { MemoryIconProvider(applicationContext) }
 
     override fun onStartListening() {
-        super.onStartListening()
         memoryManager.setListening(true)
+        super.onStartListening()
     }
 
     override fun onStopListening() {
@@ -26,16 +25,15 @@ class MemoryTileService : BaseTileService() {
 
     override fun onClick() {
         memoryManager.toggle()
+        updateTile()
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(
-            memoryManager.currentState,
-            memoryManager.usedValue,
-            memoryManager.totalValue,
-            memoryManager.detailValue
-        )
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        memoryManager.currentState,
+        memoryManager.usedValue,
+        memoryManager.totalValue,
+        memoryManager.detailValue,
+    )
 
     override fun updateTile() {
         val state = memoryManager.currentState.value
@@ -45,9 +43,9 @@ class MemoryTileService : BaseTileService() {
 
         setTileState(
             state = Tile.STATE_INACTIVE,
-            label = memoryLabelProvider.getLabel(state, detail),
-            subtitle = memoryLabelProvider.getSubtitle(used, total),
-            icon = memoryIconProvider.getIcon(state)
+            label = labelProvider.getLabel(state, detail),
+            subtitle = labelProvider.getSubtitle(used, total),
+            icon = iconProvider.getIcon(state),
         )
     }
 }

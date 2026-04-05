@@ -6,10 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import com.wstxda.toolkit.permissions.PermissionManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -17,7 +13,7 @@ class ScreenshotManager(context: Context) {
 
     private val appContext = context.applicationContext
     private val permissionManager = PermissionManager(appContext)
-    private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     private val _isPermissionGranted = MutableStateFlow(false)
     val isPermissionGranted = _isPermissionGranted.asStateFlow()
 
@@ -38,7 +34,6 @@ class ScreenshotManager(context: Context) {
 
     fun cleanup() {
         appContext.contentResolver.unregisterContentObserver(accessibilityObserver)
-        managerScope.cancel()
     }
 
     private fun checkPermission() {

@@ -1,14 +1,11 @@
 package com.wstxda.toolkit.manager.compass
 
 import android.content.Context
+import com.wstxda.toolkit.base.SingletonHolder
 
 object CompassModule {
-    @Volatile
-    private var instance: CompassManager? = null
 
-    fun getInstance(context: Context): CompassManager {
-        return instance ?: synchronized(this) {
-            instance ?: CompassManager(context.applicationContext).also { instance = it }
-        }
-    }
+    private val holder = SingletonHolder(::CompassManager)
+
+    fun getInstance(context: Context) = holder.getInstance(context)
 }

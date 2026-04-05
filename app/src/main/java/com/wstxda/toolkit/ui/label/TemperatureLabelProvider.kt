@@ -10,7 +10,7 @@ class TemperatureLabelProvider(private val context: Context) {
         return String.format(Locale.US, context.getString(R.string.temperature_tile_format), temp)
     }
 
-    fun getSubtitle(): CharSequence? {
+    fun getSubtitle(): CharSequence {
         return context.getString(R.string.temperature_tile)
     }
 }

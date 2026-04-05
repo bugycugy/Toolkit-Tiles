@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.Flow
 class ScreenshotTileService : BaseTileService() {
 
     private val screenshotManager by lazy { ScreenshotManager(applicationContext) }
-    private val screenshotLabelProvider by lazy { ScreenshotLabelProvider(applicationContext) }
-    private val screenshotIconProvider by lazy { ScreenshotIconProvider(applicationContext) }
+    private val labelProvider by lazy { ScreenshotLabelProvider(applicationContext) }
+    private val iconProvider by lazy { ScreenshotIconProvider(applicationContext) }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -28,18 +28,18 @@ class ScreenshotTileService : BaseTileService() {
         }
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(screenshotManager.isPermissionGranted)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        screenshotManager.isPermissionGranted,
+    )
 
     override fun updateTile() {
         val hasPermission = screenshotManager.isPermissionGranted.value
 
         setTileState(
             state = Tile.STATE_INACTIVE,
-            label = screenshotLabelProvider.getLabel(),
-            subtitle = screenshotLabelProvider.getSubtitle(hasPermission),
-            icon = screenshotIconProvider.getIcon()
+            label = labelProvider.getLabel(),
+            subtitle = labelProvider.getSubtitle(hasPermission),
+            icon = iconProvider.getIcon(),
         )
     }
 }

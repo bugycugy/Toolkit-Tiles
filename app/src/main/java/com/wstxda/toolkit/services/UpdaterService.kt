@@ -15,21 +15,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
-import kotlin.apply
-import kotlin.collections.getOrElse
-import kotlin.collections.map
-import kotlin.getOrDefault
-import kotlin.io.readText
-import kotlin.ranges.until
-import kotlin.runCatching
-import kotlin.text.removePrefix
-import kotlin.text.replace
-import kotlin.text.split
-import kotlin.text.toIntOrNull
 
 object UpdaterService {
 
-    private const val GITHUB_RELEASE_URL = "https://api.github.com/repos/WSTxda/Toolkit-Tiles/releases/latest"
+    private const val GITHUB_RELEASE_URL =
+        "https://api.github.com/repos/WSTxda/Toolkit-Tiles/releases/latest"
 
     fun checkForUpdates(context: Context, anchorView: View) {
         CoroutineScope(Dispatchers.Main).launch {
@@ -63,8 +53,7 @@ object UpdaterService {
 
     private suspend fun fetchLatestVersion(): String = withContext(Dispatchers.IO) {
         val jsonString = URL(GITHUB_RELEASE_URL).readText()
-        val jsonObject = JSONObject(jsonString)
-        jsonObject.optString("tag_name").removePrefix("v")
+        JSONObject(jsonString).optString("tag_name").removePrefix("v")
     }
 
     private fun getCurrentVersion(context: Context): String = runCatching {
@@ -75,7 +64,7 @@ object UpdaterService {
         if (current == "N/A") return -1
         val currentParts = current.split(".").map { it.toIntOrNull() ?: 0 }
         val latestParts = latest.split(".").map { it.toIntOrNull() ?: 0 }
-        for (i in 0 until kotlin.comparisons.maxOf(currentParts.size, latestParts.size)) {
+        for (i in 0 until maxOf(currentParts.size, latestParts.size)) {
             val curr = currentParts.getOrElse(i) { 0 }
             val late = latestParts.getOrElse(i) { 0 }
             if (curr != late) return curr - late

@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 class SoundModeManager(private val context: Context) {
 
@@ -57,33 +56,25 @@ class SoundModeManager(private val context: Context) {
         initialValue = getCurrentModeInternal()
     )
 
-    fun hasPermission(): Boolean {
-        return notificationManager.isNotificationPolicyAccessGranted
-    }
+    fun hasPermission(): Boolean = notificationManager.isNotificationPolicyAccessGranted
 
     fun cycleMode() {
         if (!hasPermission()) return
-
-        managerScope.launch {
-            val current = getCurrentModeInternal()
-            val newMode = when (current) {
-                SoundMode.NORMAL -> SoundMode.VIBRATE
-                SoundMode.VIBRATE -> SoundMode.SILENT
-                SoundMode.SILENT -> SoundMode.NORMAL
-            }
-            audioManager.ringerMode = newMode.ringerMode
+        val newMode = when (getCurrentModeInternal()) {
+            SoundMode.NORMAL -> SoundMode.VIBRATE
+            SoundMode.VIBRATE -> SoundMode.SILENT
+            SoundMode.SILENT -> SoundMode.NORMAL
         }
+        audioManager.ringerMode = newMode.ringerMode
     }
 
     fun cleanup() {
         managerScope.cancel()
     }
 
-    fun getCurrentModeInternal(): SoundMode {
-        return when (audioManager.ringerMode) {
-            AudioManager.RINGER_MODE_VIBRATE -> SoundMode.VIBRATE
-            AudioManager.RINGER_MODE_SILENT -> SoundMode.SILENT
-            else -> SoundMode.NORMAL
-        }
+    fun getCurrentModeInternal(): SoundMode = when (audioManager.ringerMode) {
+        AudioManager.RINGER_MODE_VIBRATE -> SoundMode.VIBRATE
+        AudioManager.RINGER_MODE_SILENT -> SoundMode.SILENT
+        else -> SoundMode.NORMAL
     }
 }

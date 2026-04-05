@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 class LockTileService : BaseTileService() {
 
     private val lockManager by lazy { LockManager(applicationContext) }
-    private val lockLabelProvider by lazy { LockLabelProvider(applicationContext) }
-    private val lockIconProvider by lazy { LockIconProvider(applicationContext) }
+    private val labelProvider by lazy { LockLabelProvider(applicationContext) }
+    private val iconProvider by lazy { LockIconProvider(applicationContext) }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -27,18 +27,18 @@ class LockTileService : BaseTileService() {
         }
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(lockManager.isPermissionGranted)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        lockManager.isPermissionGranted,
+    )
 
     override fun updateTile() {
         val hasPermission = lockManager.isPermissionGranted.value
 
         setTileState(
             state = Tile.STATE_INACTIVE,
-            label = lockLabelProvider.getLabel(),
-            subtitle = lockLabelProvider.getSubtitle(hasPermission),
-            icon = lockIconProvider.getIcon()
+            label = labelProvider.getLabel(),
+            subtitle = labelProvider.getSubtitle(hasPermission),
+            icon = iconProvider.getIcon(),
         )
     }
 }

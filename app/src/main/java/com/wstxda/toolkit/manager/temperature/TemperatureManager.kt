@@ -25,9 +25,13 @@ class TemperatureManager(context: Context) {
     private val _temperature = MutableStateFlow(0f)
     val temperature = _temperature.asStateFlow()
     private var pollingJob: Job? = null
+    private var isPanelOpen = false
 
     fun setListening(listening: Boolean) {
+        if (isPanelOpen == listening) return
+        isPanelOpen = listening
         if (listening) {
+            updateData()
             startPolling()
         } else {
             stopPolling()
@@ -36,9 +40,7 @@ class TemperatureManager(context: Context) {
 
     private fun startPolling() {
         if (pollingJob?.isActive == true) return
-
         pollingJob = managerScope.launch {
-            updateData()
             while (isActive) {
                 delay(REFRESH_RATE_MS)
                 updateData()
@@ -52,7 +54,9 @@ class TemperatureManager(context: Context) {
     }
 
     private fun updateData() {
-        val intent = appContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val intent = appContext.registerReceiver(
+            null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        )
         val tempInt = intent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
         _temperature.value = tempInt / 10f
     }

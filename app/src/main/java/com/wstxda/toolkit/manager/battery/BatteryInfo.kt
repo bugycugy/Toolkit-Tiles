@@ -1,5 +1,7 @@
 package com.wstxda.toolkit.manager.battery
 
+import kotlin.math.abs
+
 data class BatteryInfo(
     val level: Int = 0,
     val voltageMv: Int = 0,
@@ -14,8 +16,5 @@ data class BatteryInfo(
     val voltageV: Float get() = voltageMv / 1000f
     val temperatureC: Float get() = temperatureTenths / 10f
     val isLow: Boolean get() = !isCharging && level <= 15
-    val signedCurrentMa: Int
-        get() = if (isCharging) kotlin.math.abs(currentMa) else -kotlin.math.abs(
-            currentMa
-        )
+    val signedCurrentMa: Int get() = if (isCharging) abs(currentMa) else -abs(currentMa)
 }

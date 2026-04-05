@@ -10,28 +10,29 @@ import kotlinx.coroutines.flow.Flow
 
 class CounterAddTileService : BaseTileService() {
 
-    private val counterModule by lazy { CounterModule.getInstance(applicationContext) }
-    private val counterLabelProvider by lazy { CounterLabelProvider(applicationContext) }
-    private val counterIconProvider by lazy { CounterIconProvider(applicationContext) }
+    private val counterManager by lazy { CounterModule.getInstance(applicationContext) }
+    private val labelProvider by lazy { CounterLabelProvider(applicationContext) }
+    private val iconProvider by lazy { CounterIconProvider(applicationContext) }
 
     override fun onClick() {
-        counterModule.increment()
+        counterManager.increment()
+        updateTile()
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(counterModule.count, counterModule.lastAction)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        counterManager.count,
+        counterManager.lastAction,
+    )
 
     override fun updateTile() {
-        val count = counterModule.count.value
-        val action = counterModule.lastAction.value
-        val isActive = action == CounterAction.ADD
+        val count = counterManager.count.value
+        val isActive = counterManager.lastAction.value == CounterAction.ADD
 
         setTileState(
             state = if (isActive) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE,
-            label = counterLabelProvider.getAddLabel(isActive, count),
-            subtitle = counterLabelProvider.getAddSubtitle(isActive),
-            icon = counterIconProvider.getAddIcon()
+            label = labelProvider.getAddLabel(isActive, count),
+            subtitle = labelProvider.getAddSubtitle(isActive),
+            icon = iconProvider.getAddIcon(),
         )
     }
 }

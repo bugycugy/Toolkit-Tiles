@@ -30,15 +30,12 @@ class CounterManager(context: Context) {
     val lastAction = _lastAction.asStateFlow()
 
     init {
-        managerScope.launch {
-            val prefs = getPrefs()
-            _count.value = prefs.getInt(KEY_COUNT, 0)
-
-            val actionString = prefs.getString(KEY_ACTION, CounterAction.NONE.name)
-            _lastAction.value = runCatching {
-                CounterAction.valueOf(actionString!!)
-            }.getOrDefault(CounterAction.NONE)
-        }
+        val prefs = getPrefs()
+        _count.value = prefs.getInt(KEY_COUNT, 0)
+        val actionName = prefs.getString(KEY_ACTION, CounterAction.NONE.name)
+        _lastAction.value = runCatching {
+            CounterAction.valueOf(actionName!!)
+        }.getOrDefault(CounterAction.NONE)
     }
 
     fun increment() {
@@ -68,13 +65,11 @@ class CounterManager(context: Context) {
     }
 
     private fun refreshAllTiles() {
-        val classes = listOf(
+        listOf(
             CounterAddTileService::class.java,
             CounterRemoveTileService::class.java,
             CounterResetTileService::class.java
-        )
-
-        classes.forEach { clazz ->
+        ).forEach { clazz ->
             TileService.requestListeningState(appContext, ComponentName(appContext, clazz))
         }
     }

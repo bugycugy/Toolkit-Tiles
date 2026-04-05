@@ -72,7 +72,7 @@ class CompassManager(context: Context) : SensorEventListener {
         val sensor = rotationSensor ?: return
 
         if (!isSensorRegistered) {
-            sm.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+            sm.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
             isSensorRegistered = true
             lastHapticDegrees = null
         }

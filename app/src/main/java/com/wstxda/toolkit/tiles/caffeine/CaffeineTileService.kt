@@ -11,36 +11,38 @@ import kotlinx.coroutines.flow.Flow
 
 class CaffeineTileService : BaseTileService() {
 
-    private val caffeineModule by lazy { CaffeineModule.getInstance(applicationContext) }
-    private val caffeineLabelProvider by lazy { CaffeineLabelProvider(applicationContext) }
-    private val caffeineIconProvider by lazy { CaffeineIconProvider(applicationContext) }
+    private val caffeineManager by lazy { CaffeineModule.getInstance(applicationContext) }
+    private val labelProvider by lazy { CaffeineLabelProvider(applicationContext) }
+    private val iconProvider by lazy { CaffeineIconProvider(applicationContext) }
 
     override fun onStartListening() {
+        caffeineManager.synchronizeState()
         super.onStartListening()
-        caffeineModule.synchronizeState()
     }
 
     override fun onClick() {
-        if (caffeineModule.isPermissionGranted()) {
-            caffeineModule.cycleState()
+        if (caffeineManager.isPermissionGranted()) {
+            caffeineManager.cycleState()
+            updateTile()
         } else {
             startActivityAndCollapse(WriteSettingsPermissionActivity::class.java)
         }
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(caffeineModule.currentState)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        caffeineManager.currentState,
+    )
 
     override fun updateTile() {
-        val state = caffeineModule.currentState.value
-        val hasPermission = caffeineModule.isPermissionGranted()
+        val state = caffeineManager.currentState.value
+        val hasPermission = caffeineManager.isPermissionGranted()
 
         setTileState(
-            state = if (state != CaffeineState.Off && hasPermission) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE,
-            label = caffeineLabelProvider.getLabel(state, hasPermission),
-            subtitle = caffeineLabelProvider.getSubtitle(state, hasPermission),
-            icon = caffeineIconProvider.getIcon(state)
+            state = if (state != CaffeineState.Off && hasPermission) Tile.STATE_ACTIVE
+            else Tile.STATE_INACTIVE,
+            label = labelProvider.getLabel(state, hasPermission),
+            subtitle = labelProvider.getSubtitle(state, hasPermission),
+            icon = iconProvider.getIcon(state),
         )
     }
 }

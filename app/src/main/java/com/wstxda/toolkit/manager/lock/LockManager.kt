@@ -10,10 +10,6 @@ import android.provider.Settings
 import com.wstxda.toolkit.permissions.PermissionManager
 import com.wstxda.toolkit.services.accessibility.TileAccessibilityAction
 import com.wstxda.toolkit.services.accessibility.TileAccessibilityService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -21,7 +17,7 @@ class LockManager(context: Context) {
 
     private val appContext = context.applicationContext
     private val permissionManager = PermissionManager(appContext)
-    private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     private val _isPermissionGranted = MutableStateFlow(false)
     val isPermissionGranted = _isPermissionGranted.asStateFlow()
 
@@ -45,7 +41,10 @@ class LockManager(context: Context) {
 
         val intent = Intent(appContext, TileAccessibilityService::class.java).apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                putExtra(TileAccessibilityService.Companion.ACTION_KEY, TileAccessibilityAction.LOCK_SCREEN)
+                putExtra(
+                    TileAccessibilityService.ACTION_KEY,
+                    TileAccessibilityAction.LOCK_SCREEN
+                )
             }
         }
         appContext.startService(intent)
@@ -53,7 +52,6 @@ class LockManager(context: Context) {
 
     fun cleanup() {
         appContext.contentResolver.unregisterContentObserver(accessibilityObserver)
-        managerScope.cancel()
     }
 
     private fun checkPermission() {

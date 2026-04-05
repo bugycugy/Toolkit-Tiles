@@ -22,7 +22,7 @@ class BatteryManager(context: Context) {
     companion object {
         private const val PREFS_NAME = "battery_prefs"
         private const val KEY_DISPLAY_STATE = "display_state"
-        private const val REFRESH_RATE_MS = 3_000L
+        private const val REFRESH_RATE_MS = 3000L
     }
 
     private val appContext = context.applicationContext
@@ -63,7 +63,13 @@ class BatteryManager(context: Context) {
     fun setListening(listening: Boolean) {
         if (isPanelOpen == listening) return
         isPanelOpen = listening
+
         if (listening) {
+            val sticky = appContext.registerReceiver(
+                null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+            )
+            if (sticky != null) _batteryInfo.value = readBatteryInfo(sticky)
+
             registerReceiver()
             startPolling()
         } else {
@@ -83,10 +89,6 @@ class BatteryManager(context: Context) {
     private fun startPolling() {
         if (pollingJob?.isActive == true) return
         pollingJob = managerScope.launch {
-            val sticky =
-                appContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            if (sticky != null) _batteryInfo.value = readBatteryInfo(sticky)
-
             while (isActive) {
                 delay(REFRESH_RATE_MS)
                 _batteryInfo.value = _batteryInfo.value.copy(
@@ -123,7 +125,7 @@ class BatteryManager(context: Context) {
         return BatteryInfo(
             level = percent,
             voltageMv = intent.getIntExtra(AndroidBatteryManager.EXTRA_VOLTAGE, 0),
-            currentMa = readCurrentMa(),
+            currentMa = _batteryInfo.value.currentMa,
             temperatureTenths = intent.getIntExtra(AndroidBatteryManager.EXTRA_TEMPERATURE, 0),
             healthCode = intent.getIntExtra(
                 AndroidBatteryManager.EXTRA_HEALTH, AndroidBatteryManager.BATTERY_HEALTH_UNKNOWN

@@ -1,14 +1,11 @@
 package com.wstxda.toolkit.manager.sos
 
 import android.content.Context
+import com.wstxda.toolkit.base.SingletonHolder
 
 object SosModule {
-    @Volatile
-    private var instance: SosManager? = null
 
-    fun getInstance(context: Context): SosManager {
-        return instance ?: synchronized(this) {
-            instance ?: SosManager(context.applicationContext).also { instance = it }
-        }
-    }
+    private val holder = SingletonHolder(::SosManager)
+
+    fun getInstance(context: Context) = holder.getInstance(context)
 }

@@ -11,40 +11,41 @@ import kotlinx.coroutines.flow.Flow
 
 class SosTileService : BaseTileService() {
 
-    private val sosModule by lazy { SosModule.getInstance(applicationContext) }
-    private val sosLabelProvider by lazy { SosLabelProvider(applicationContext) }
-    private val sosIconProvider by lazy { SosIconProvider(applicationContext) }
+    private val sosManager by lazy { SosModule.getInstance(applicationContext) }
+    private val labelProvider by lazy { SosLabelProvider(applicationContext) }
+    private val iconProvider by lazy { SosIconProvider(applicationContext) }
 
     override fun onClick() {
-        if (!sosModule.hasFlashHardware()) {
-            Toast.makeText(this, getString(R.string.not_supported), Toast.LENGTH_SHORT).show()
+        if (!sosManager.hasFlashHardware()) {
+            Toast.makeText(this, R.string.not_supported, Toast.LENGTH_SHORT).show()
             return
         }
+        if (!sosManager.isFlashAvailable.value) return
 
-        if (qsTile?.state == Tile.STATE_UNAVAILABLE) return
-
-        sosModule.toggle()
+        sosManager.toggle()
+        updateTile()
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(sosModule.isActive, sosModule.isFlashAvailable)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        sosManager.isActive,
+        sosManager.isFlashAvailable,
+    )
 
     override fun updateTile() {
-        val active = sosModule.isActive.value
-        val isHardwareAvailable = sosModule.hasFlashHardware()
-        val isSystemAvailable = sosModule.isFlashAvailable.value
+        val isActive = sosManager.isActive.value
+        val isHardwareAvailable = sosManager.hasFlashHardware()
+        val isSystemAvailable = sosManager.isFlashAvailable.value
         val isFullyAvailable = isHardwareAvailable && isSystemAvailable
 
         setTileState(
             state = when {
                 !isFullyAvailable -> Tile.STATE_UNAVAILABLE
-                active -> Tile.STATE_ACTIVE
+                isActive -> Tile.STATE_ACTIVE
                 else -> Tile.STATE_INACTIVE
             },
-            label = sosLabelProvider.getLabel(),
-            subtitle = sosLabelProvider.getSubtitle(active, isFullyAvailable),
-            icon = sosIconProvider.getIcon()
+            label = labelProvider.getLabel(),
+            subtitle = labelProvider.getSubtitle(isActive, isFullyAvailable),
+            icon = iconProvider.getIcon(),
         )
     }
 }

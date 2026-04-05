@@ -43,9 +43,7 @@ class CaffeineManager(context: Context) {
     private val screenOffReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Intent.ACTION_SCREEN_OFF) {
-                managerScope.launch {
-                    restoreOriginalTimeout()
-                }
+                managerScope.launch { restoreOriginalTimeout() }
             }
         }
     }
@@ -63,16 +61,13 @@ class CaffeineManager(context: Context) {
 
             if (expectedTimeout != -1) {
                 val systemTimeout = getSystemTimeout()
-
                 if (systemTimeout != expectedTimeout) {
                     forceReset()
                 } else {
                     val restoredState =
                         stateCycle.find { it.timeout == expectedTimeout } ?: CaffeineState.Off
                     _currentState.value = restoredState
-                    if (restoredState != CaffeineState.Off) {
-                        toggleReceiver(true)
-                    }
+                    if (restoredState != CaffeineState.Off) toggleReceiver(true)
                 }
             } else {
                 _currentState.value = CaffeineState.Off
@@ -81,18 +76,17 @@ class CaffeineManager(context: Context) {
         }
     }
 
-    fun isPermissionGranted(): Boolean {
-        return Settings.System.canWrite(appContext)
-    }
+    fun isPermissionGranted(): Boolean = Settings.System.canWrite(appContext)
 
     fun cycleState() {
+        if (!isPermissionGranted()) return
+
+        val currentIndex = stateCycle.indexOf(_currentState.value)
+        val nextState = stateCycle[(currentIndex + 1) % stateCycle.size]
+
+        _currentState.value = nextState
+
         managerScope.launch {
-            if (!isPermissionGranted()) return@launch
-
-            val currentIndex = stateCycle.indexOf(_currentState.value)
-            val nextIndex = (currentIndex + 1) % stateCycle.size
-            val nextState = stateCycle[nextIndex]
-
             applyState(nextState)
         }
     }
@@ -101,12 +95,11 @@ class CaffeineManager(context: Context) {
         if (newState == CaffeineState.Off) {
             restoreOriginalTimeout()
         } else {
-            if (_currentState.value == CaffeineState.Off) {
-                saveOriginalTimeout()
+            if (_currentState.value == newState) {
+                if (stateCycle.indexOf(newState) == 1) saveOriginalTimeout()
             }
 
             if (setSystemTimeout(newState.timeout)) {
-                _currentState.value = newState
                 getPrefs().edit { putInt(PREF_KEY_EXPECTED, newState.timeout) }
                 toggleReceiver(true)
             } else {
@@ -118,9 +111,7 @@ class CaffeineManager(context: Context) {
 
     private fun saveOriginalTimeout() {
         val current = getSystemTimeout()
-        if (stateCycle.any { it.timeout == current && it != CaffeineState.Off }) {
-            return
-        }
+        if (stateCycle.any { it.timeout == current && it != CaffeineState.Off }) return
         getPrefs().edit { putInt(PREF_KEY_ORIGINAL, current) }
     }
 
@@ -132,9 +123,7 @@ class CaffeineManager(context: Context) {
 
     private fun forceReset() {
         _currentState.value = CaffeineState.Off
-        getPrefs().edit {
-            remove(PREF_KEY_EXPECTED)
-        }
+        getPrefs().edit { remove(PREF_KEY_EXPECTED) }
         toggleReceiver(false)
         requestTileUpdate()
     }
@@ -160,23 +149,19 @@ class CaffeineManager(context: Context) {
         }
     }
 
-    private fun getSystemTimeout(): Int {
-        return try {
-            Settings.System.getInt(appContext.contentResolver, Settings.System.SCREEN_OFF_TIMEOUT)
-        } catch (_: Exception) {
-            DEFAULT_TIMEOUT
-        }
+    private fun getSystemTimeout(): Int = try {
+        Settings.System.getInt(appContext.contentResolver, Settings.System.SCREEN_OFF_TIMEOUT)
+    } catch (_: Exception) {
+        DEFAULT_TIMEOUT
     }
 
-    private fun setSystemTimeout(timeout: Int): Boolean {
-        return try {
-            Settings.System.putInt(
-                appContext.contentResolver, Settings.System.SCREEN_OFF_TIMEOUT, timeout
-            )
-            true
-        } catch (_: Exception) {
-            false
-        }
+    private fun setSystemTimeout(timeout: Int): Boolean = try {
+        Settings.System.putInt(
+            appContext.contentResolver, Settings.System.SCREEN_OFF_TIMEOUT, timeout
+        )
+        true
+    } catch (_: Exception) {
+        false
     }
 
     private fun requestTileUpdate() {

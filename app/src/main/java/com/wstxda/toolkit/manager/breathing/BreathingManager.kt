@@ -7,12 +7,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
 import kotlin.math.ceil
 
 class BreathingManager(context: Context) {
@@ -65,7 +65,7 @@ class BreathingManager(context: Context) {
         var elapsedTime = 0L
         var nextHapticTrigger = 0L
 
-        while (elapsedTime < duration && coroutineContext.isActive) {
+        while (elapsedTime < duration && currentCoroutineContext().isActive) {
             elapsedTime = System.currentTimeMillis() - startTime
 
             if (useHaptics && elapsedTime >= nextHapticTrigger) {

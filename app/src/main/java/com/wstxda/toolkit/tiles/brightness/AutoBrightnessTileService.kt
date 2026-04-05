@@ -11,12 +11,12 @@ import kotlinx.coroutines.flow.Flow
 class AutoBrightnessTileService : BaseTileService() {
 
     private val brightnessManager by lazy { AutoBrightnessManager(applicationContext) }
-    private val brightnessLabelProvider by lazy { AutoBrightnessLabelProvider(applicationContext) }
-    private val brightnessIconProvider by lazy { AutoBrightnessIconProvider(applicationContext) }
+    private val labelProvider by lazy { AutoBrightnessLabelProvider(applicationContext) }
+    private val iconProvider by lazy { AutoBrightnessIconProvider(applicationContext) }
 
     override fun onStartListening() {
-        super.onStartListening()
         brightnessManager.start()
+        super.onStartListening()
     }
 
     override fun onStopListening() {
@@ -32,14 +32,15 @@ class AutoBrightnessTileService : BaseTileService() {
     override fun onClick() {
         if (brightnessManager.isPermissionGranted()) {
             brightnessManager.toggle()
+            updateTile()
         } else {
             startActivityAndCollapse(WriteSettingsPermissionActivity::class.java)
         }
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(brightnessManager.isEnabled)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        brightnessManager.isEnabled,
+    )
 
     override fun updateTile() {
         val isActive = brightnessManager.isEnabled.value
@@ -47,9 +48,9 @@ class AutoBrightnessTileService : BaseTileService() {
 
         setTileState(
             state = if (isActive && hasPermission) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE,
-            label = brightnessLabelProvider.getLabel(),
-            subtitle = brightnessLabelProvider.getSubtitle(isActive, hasPermission),
-            icon = brightnessIconProvider.getIcon(isActive)
+            label = labelProvider.getLabel(),
+            subtitle = labelProvider.getSubtitle(isActive, hasPermission),
+            icon = iconProvider.getIcon(isActive),
         )
     }
 }

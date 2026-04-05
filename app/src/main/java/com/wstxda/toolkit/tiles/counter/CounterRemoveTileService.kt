@@ -10,28 +10,29 @@ import kotlinx.coroutines.flow.Flow
 
 class CounterRemoveTileService : BaseTileService() {
 
-    private val counterModule by lazy { CounterModule.getInstance(applicationContext) }
-    private val counterLabelProvider by lazy { CounterLabelProvider(applicationContext) }
-    private val counterIconProvider by lazy { CounterIconProvider(applicationContext) }
+    private val counterManager by lazy { CounterModule.getInstance(applicationContext) }
+    private val labelProvider by lazy { CounterLabelProvider(applicationContext) }
+    private val iconProvider by lazy { CounterIconProvider(applicationContext) }
 
     override fun onClick() {
-        counterModule.decrement()
+        counterManager.decrement()
+        updateTile()
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(counterModule.count, counterModule.lastAction)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        counterManager.count,
+        counterManager.lastAction,
+    )
 
     override fun updateTile() {
-        val count = counterModule.count.value
-        val action = counterModule.lastAction.value
-        val isActive = action == CounterAction.REMOVE
+        val count = counterManager.count.value
+        val isActive = counterManager.lastAction.value == CounterAction.REMOVE
 
         setTileState(
             state = if (isActive) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE,
-            label = counterLabelProvider.getRemoveLabel(isActive, count),
-            subtitle = counterLabelProvider.getRemoveSubtitle(isActive),
-            icon = counterIconProvider.getRemoveIcon()
+            label = labelProvider.getRemoveLabel(isActive, count),
+            subtitle = labelProvider.getRemoveSubtitle(isActive),
+            icon = iconProvider.getRemoveIcon(),
         )
     }
 }

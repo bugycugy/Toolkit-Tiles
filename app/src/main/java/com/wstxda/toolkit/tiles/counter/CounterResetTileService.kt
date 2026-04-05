@@ -9,25 +9,25 @@ import kotlinx.coroutines.flow.Flow
 
 class CounterResetTileService : BaseTileService() {
 
-    private val counterModule by lazy { CounterModule.getInstance(applicationContext) }
-    private val counterLabelProvider by lazy { CounterLabelProvider(applicationContext) }
-    private val counterIconProvider by lazy { CounterIconProvider(applicationContext) }
+    private val counterManager by lazy { CounterModule.getInstance(applicationContext) }
+    private val labelProvider by lazy { CounterLabelProvider(applicationContext) }
+    private val iconProvider by lazy { CounterIconProvider(applicationContext) }
 
     override fun onClick() {
-        counterModule.reset()
+        counterManager.reset()
+        updateTile()
     }
 
-    override fun flowsToCollect(): List<Flow<*>> {
-        return listOf(counterModule.count)
-    }
+    override fun flowsToCollect(): List<Flow<*>> = listOf(
+        counterManager.count,
+    )
 
     override fun updateTile() {
-
         setTileState(
             state = Tile.STATE_INACTIVE,
-            label = counterLabelProvider.getResetLabel(),
-            subtitle = counterLabelProvider.getResetSubtitle(),
-            icon = counterIconProvider.getResetIcon()
+            label = labelProvider.getResetLabel(),
+            subtitle = labelProvider.getResetSubtitle(),
+            icon = iconProvider.getResetIcon(),
         )
     }
 }

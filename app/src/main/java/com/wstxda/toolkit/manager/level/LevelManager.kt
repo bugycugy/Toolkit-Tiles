@@ -41,7 +41,6 @@ class LevelManager(context: Context) : SensorEventListener {
         get() = appContext.getSystemService(DisplayManager::class.java)
             ?.getDisplay(Display.DEFAULT_DISPLAY)
 
-
     fun toggle() {
         _isEnabled.value = !_isEnabled.value
         updateSensorState()
@@ -71,7 +70,7 @@ class LevelManager(context: Context) : SensorEventListener {
     private fun registerSensor() {
         val sensor = rotationSensor ?: return
         if (!isSensorRegistered) {
-            sensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+            sensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
             isSensorRegistered = true
         }
     }
