@@ -11,7 +11,6 @@ import androidx.core.app.NotificationCompat
 import com.wstxda.toolkit.R
 
 private const val CHANNEL_ID = "TOOLKIT_CHANNEL"
-const val NOTIFICATION_ID = 1
 
 fun TileService.channel() = NotificationChannel(
     CHANNEL_ID, getString(R.string.channel_name), NotificationManager.IMPORTANCE_LOW
