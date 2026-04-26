@@ -20,7 +20,12 @@ class SosTileService : BaseForegroundActiveTileService() {
         sosManager.toggle()
     }
 
-    override fun stopFeature() = sosManager.cleanup()
+    override fun stopFeature() = sosManager.stop()
+
+    override fun onTileRemoved() {
+        sosManager.cleanup()
+        super.onTileRemoved()
+    }
 
     override fun flowsToCollect(): List<Flow<*>> = listOf(
         sosManager.isActive,
