@@ -1,6 +1,7 @@
+@file:Suppress("unused")
+
 package com.wstxda.toolkit.ui.utils
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.media.AudioAttributes
 import android.os.Build
@@ -8,6 +9,7 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import com.wstxda.toolkit.data.HapticLevel
 
 class Haptics(context: Context) {
 
@@ -18,20 +20,20 @@ class Haptics(context: Context) {
         context.getSystemService(Vibrator::class.java)!!
     }
 
-    @SuppressLint("InlinedApi")
-    fun tick() = performSafely(
-        effectId = VibrationEffect.EFFECT_TICK, fallbackDuration = 10L, fallbackAmplitude = 100
-    )
+    fun low() = perform(HapticLevel.LOW)
+    fun medium() = perform(HapticLevel.MEDIUM)
+    fun high() = perform(HapticLevel.HIGH)
+    fun veryHigh() = perform(HapticLevel.VERY_HIGH)
 
-    @SuppressLint("InlinedApi")
-    fun click() = performSafely(
-        effectId = VibrationEffect.EFFECT_CLICK,
-        fallbackDuration = 25L,
-        fallbackAmplitude = VibrationEffect.DEFAULT_AMPLITUDE
-    )
+    fun vibrate(duration: Long, level: HapticLevel = HapticLevel.MEDIUM) {
+        if (!hasVibrator() || duration <= 0) return
 
-    fun long(duration: Long, amplitude: Int = VibrationEffect.DEFAULT_AMPLITUDE) {
-        if (!hasVibrator()) return
+        val amplitude = when (level) {
+            HapticLevel.LOW -> 50
+            HapticLevel.MEDIUM -> 120
+            HapticLevel.HIGH -> 200
+            HapticLevel.VERY_HIGH -> 255
+        }
         vibrateCompat(VibrationEffect.createOneShot(duration, amplitude))
     }
 
@@ -41,15 +43,32 @@ class Haptics(context: Context) {
 
     private fun hasVibrator(): Boolean = vibrator.hasVibrator()
 
-    private fun performSafely(effectId: Int, fallbackDuration: Long, fallbackAmplitude: Int) {
+    private fun perform(level: HapticLevel) {
         if (!hasVibrator()) return
 
-        val effect = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            VibrationEffect.createPredefined(effectId)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val effectId = when (level) {
+                HapticLevel.LOW -> VibrationEffect.EFFECT_TICK
+                HapticLevel.MEDIUM -> VibrationEffect.EFFECT_CLICK
+                HapticLevel.HIGH -> VibrationEffect.EFFECT_HEAVY_CLICK
+                HapticLevel.VERY_HIGH -> VibrationEffect.EFFECT_DOUBLE_CLICK
+            }
+            vibrateCompat(VibrationEffect.createPredefined(effectId))
         } else {
-            VibrationEffect.createOneShot(fallbackDuration, fallbackAmplitude)
+            val duration = when (level) {
+                HapticLevel.LOW -> 15L
+                HapticLevel.MEDIUM -> 30L
+                HapticLevel.HIGH -> 50L
+                HapticLevel.VERY_HIGH -> 75L
+            }
+            val amplitude = when (level) {
+                HapticLevel.LOW -> 50
+                HapticLevel.MEDIUM -> 120
+                HapticLevel.HIGH -> 200
+                HapticLevel.VERY_HIGH -> 255
+            }
+            vibrateCompat(VibrationEffect.createOneShot(duration, amplitude))
         }
-        vibrateCompat(effect)
     }
 
     private fun vibrateCompat(effect: VibrationEffect) {
@@ -62,6 +81,7 @@ class Haptics(context: Context) {
             val attributes =
                 AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).build()
+
             @Suppress("DEPRECATION") vibrator.vibrate(effect, attributes)
         }
     }

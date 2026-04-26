@@ -106,7 +106,7 @@ class CompassManager(context: Context) : SensorEventListener {
         }
 
         if (abs(degrees - lastHapticDegrees!!) > 2f) {
-            haptics.tick()
+            haptics.low()
             lastHapticDegrees = degrees
         }
     }

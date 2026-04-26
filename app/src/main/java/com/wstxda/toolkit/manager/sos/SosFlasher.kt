@@ -4,6 +4,7 @@ import android.content.Context
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import com.wstxda.toolkit.data.HapticLevel
 import com.wstxda.toolkit.ui.utils.Haptics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -133,7 +134,7 @@ class SosFlasher(context: Context) {
     private suspend fun blink(duration: Long) {
         if (!currentCoroutineContext().isActive) return
         setTorch(true)
-        haptics.long(duration)
+        haptics.vibrate(duration, HapticLevel.VERY_HIGH)
         delay(duration)
         setTorch(false)
     }

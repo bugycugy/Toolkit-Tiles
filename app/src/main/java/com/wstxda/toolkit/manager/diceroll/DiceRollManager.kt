@@ -37,12 +37,12 @@ class DiceRollManager(context: Context) {
 
             for (i in 0 until 12) {
                 _currentRoll.value = Random.nextInt(1, 7)
-                haptics.tick()
+                haptics.low()
                 delay(60L + (i * 30))
             }
 
             _currentRoll.value = finalRoll
-            haptics.click()
+            haptics.veryHigh()
             _isRolling.value = false
         }
     }

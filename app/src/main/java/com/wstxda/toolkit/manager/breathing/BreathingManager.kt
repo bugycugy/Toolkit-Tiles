@@ -50,6 +50,9 @@ class BreathingManager(context: Context) {
     private suspend fun runCycle() {
         runPhase(BreathingPhase.INHALE, DURATION_INHALE, 0f, 1f, useHaptics = true)
         runPhase(BreathingPhase.HOLD_FULL, DURATION_HOLD_FULL, 1f, 1f)
+
+        haptics.veryHigh()
+
         runPhase(BreathingPhase.EXHALE, DURATION_EXHALE, 1f, 0f)
         runPhase(BreathingPhase.HOLD_EMPTY, DURATION_HOLD_EMPTY, 0f, 0f)
     }
@@ -69,7 +72,7 @@ class BreathingManager(context: Context) {
             elapsedTime = System.currentTimeMillis() - startTime
 
             if (useHaptics && elapsedTime >= nextHapticTrigger) {
-                haptics.tick()
+                haptics.low()
                 nextHapticTrigger += INHALE_TICK_INTERVAL
             }
 

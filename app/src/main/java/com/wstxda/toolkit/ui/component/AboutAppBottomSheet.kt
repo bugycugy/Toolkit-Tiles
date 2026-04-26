@@ -47,7 +47,7 @@ class AboutAppBottomSheet : BaseBottomSheet<DialogAboutAppBinding>() {
             }
 
             binding.appIconContainer.setOnClickListener {
-                haptics.tick()
+                haptics.low()
                 viewModel.openAppInfo()
             }
         }

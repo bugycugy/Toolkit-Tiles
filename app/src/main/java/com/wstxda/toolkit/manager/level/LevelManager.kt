@@ -112,7 +112,7 @@ class LevelManager(context: Context) : SensorEventListener {
     private fun vibrateOnZero() {
         val now = System.currentTimeMillis()
         if (now - lastHapticFeedback > 500) {
-            haptics.click()
+            haptics.veryHigh()
             lastHapticFeedback = now
         }
     }
