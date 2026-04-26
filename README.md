@@ -15,27 +15,38 @@ Whether you need a quick measurement, a random decision, system controls, or an 
 
 ## Available Tiles
 
-#### 🧭 Sensors & Measurement
-- **Bubble Level** — Surface alignment and tilt detection  
-- **Compass** — Cardinal directions and azimuth using device sensors  
-- **Lux Meter** — Ambient light intensity (lux)  
-- **Temperature** — Battery temperature  
+#### Sensors & Measurement
 
-#### 🎲 Utilities & Fun
-- **Coin Flip** — Virtual coin toss  
-- **Counter** — Increment, decrement and reset counters  
-- **Dice Roll** — Simulated dice roll  
+* **Bubble Level:** Surface alignment and tilt detection
+* **Compass:** Cardinal directions and azimuth using device sensors
+* **Lux Meter:** Ambient light intensity (lux)
+* **Network Traffic:** Monitor real-time network speed
+* **Temperature:** Battery temperature
 
-#### ⚙️ System & Controls
-- **Caffeine** — Keep the screen awake  
-- **Device Memory** — Display use of RAM and internal storage  
-- **Lock Screen** — Lock the device instantly  
-- **Media / Sound Output** — Audio output selector  
-- **Screenshot** — Take screenshots from Quick Settings  
-- **Sound Mode** — Ring/vibrate/silent toggle  
+#### Utilities & Fun
 
-#### 🆘 Safety
-- **SOS** — Morse SOS using the camera flash  
+* **Coin Flip:** Virtual coin toss
+* **Counter:** Increment, decrement and reset counters
+* **Dice Roll:** Simulated dice roll
+
+#### System & Controls
+
+* **Auto Brightness:** Toggle automatic screen brightness
+* **Battery Info:** Display battery status, charging, and health information
+* **Caffeine:** Keep the screen awake
+* **Device Memory:** Display use of RAM and internal storage
+* **DNS:** Switch between multiple DNS providers
+* **Lock Screen:** Lock the device instantly
+* **Media / Sound Output:** Audio output selector
+* **NFC:** Toggle the device's NFC
+* **Screenshot:** Take screenshots from Quick Settings
+* **Sound Mode:** Ring/vibrate/silent toggle
+* **USB Debugging:** Toggle USB debugging in developer settings
+
+#### Wellbeing
+
+* **Breathing:** Guided breathing exercise
+* **SOS:** Morse SOS using the camera flash
 
 ## Installation & Usage
 
