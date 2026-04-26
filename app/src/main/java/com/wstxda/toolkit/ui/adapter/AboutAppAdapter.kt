@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.listitem.ListItemLayout
 import com.wstxda.toolkit.data.AboutItem
 import com.wstxda.toolkit.databinding.ListItemAboutBinding
+import com.wstxda.toolkit.ui.utils.Haptics
 
 class AboutAppAdapter(
     private val onClick: (AboutItem) -> Unit
@@ -25,6 +26,8 @@ class AboutAppAdapter(
     inner class LinkViewHolder(private val binding: ListItemAboutBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        private val haptics = Haptics(itemView.context.applicationContext)
+
         fun bind(link: AboutItem, position: Int, totalItems: Int) = with(binding) {
             link.title?.let { titleItem.setText(it) }
             titleItem.isVisible = link.title != null
@@ -38,10 +41,15 @@ class AboutAppAdapter(
             val isClickable = link.url != null
             cardItem.isClickable = isClickable
             cardItem.isFocusable = isClickable
-            cardItem.setOnClickListener(
-                if (isClickable) {
-                    { onClick(link) }
-                } else null)
+
+            if (isClickable) {
+                cardItem.setOnClickListener {
+                    haptics.low()
+                    onClick(link)
+                }
+            } else {
+                cardItem.setOnClickListener(null)
+            }
 
             val listItemLayout = itemView as ListItemLayout
             listItemLayout.updateAppearance(position, totalItems)

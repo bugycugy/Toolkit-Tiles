@@ -43,6 +43,7 @@ class AboutAppBottomSheet : BaseBottomSheet<DialogAboutAppBinding>() {
             binding.appUpdate.text = getString(R.string.about_version, version)
 
             binding.appUpdate.setOnClickListener {
+                haptics.low()
                 UpdaterService.checkForUpdates(requireContext(), it)
             }
 

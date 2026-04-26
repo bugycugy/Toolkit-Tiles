@@ -13,12 +13,15 @@ import androidx.core.widget.NestedScrollView
 import com.google.android.material.divider.MaterialDivider
 import com.wstxda.toolkit.R
 import com.wstxda.toolkit.databinding.DialogWriteSecureSettingsBinding
+import com.wstxda.toolkit.ui.utils.Haptics
 
 class WriteSecureSettingsBottomSheet : BaseBottomSheet<DialogWriteSecureSettingsBinding>() {
 
     companion object {
         const val TAG = "write_secure_settings"
     }
+
+    private lateinit var haptics: Haptics
 
     override val topDivider: MaterialDivider get() = binding.dividerTop
     override val bottomDivider: MaterialDivider get() = binding.dividerBottom
@@ -32,6 +35,8 @@ class WriteSecureSettingsBottomSheet : BaseBottomSheet<DialogWriteSecureSettings
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        haptics = Haptics(requireContext().applicationContext)
+
         val packageName = requireContext().packageName
         val command = "adb shell pm grant $packageName android.permission.WRITE_SECURE_SETTINGS"
 
@@ -42,12 +47,16 @@ class WriteSecureSettingsBottomSheet : BaseBottomSheet<DialogWriteSecureSettings
 
             negativeButton.apply {
                 setText(android.R.string.cancel)
-                setOnClickListener { dismiss() }
+                setOnClickListener {
+                    haptics.low()
+                    dismiss()
+                }
             }
 
             positiveButton.apply {
                 setText(R.string.copy_clipboard)
                 setOnClickListener {
+                    haptics.low()
                     copyToClipboard(command)
                     dismiss()
                 }
