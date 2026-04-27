@@ -2,7 +2,7 @@ package com.wstxda.toolkit.tiles.breathing
 
 import android.service.quicksettings.Tile
 import com.wstxda.toolkit.base.BaseTileService
-import com.wstxda.toolkit.manager.breathing.BreathingManager
+import com.wstxda.toolkit.manager.breathing.BreathingModule
 import com.wstxda.toolkit.manager.breathing.BreathingPhase
 import com.wstxda.toolkit.ui.icon.BreathingIconProvider
 import com.wstxda.toolkit.ui.label.BreathingLabelProvider
@@ -10,19 +10,9 @@ import kotlinx.coroutines.flow.Flow
 
 class BreathingTileService : BaseTileService() {
 
-    private val breathingManager by lazy { BreathingManager(applicationContext) }
+    private val breathingManager by lazy { BreathingModule.getInstance(applicationContext) }
     private val labelProvider by lazy { BreathingLabelProvider(applicationContext) }
     private val iconProvider by lazy { BreathingIconProvider(applicationContext) }
-
-    override fun onStopListening() {
-        super.onStopListening()
-        breathingManager.stop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        breathingManager.cleanup()
-    }
 
     override fun onClick() {
         breathingManager.toggle()

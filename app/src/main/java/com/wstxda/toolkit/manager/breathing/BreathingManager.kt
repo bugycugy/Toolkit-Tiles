@@ -40,9 +40,13 @@ class BreathingManager(context: Context) {
     private fun start() {
         animationJob?.cancel()
         animationJob = managerScope.launch {
-            runPhase(BreathingPhase.PREPARING, DURATION_PREPARING, 1f, 1f)
-            while (isActive) {
-                runCycle()
+            try {
+                runPhase(BreathingPhase.PREPARING, DURATION_PREPARING, 1f, 1f)
+                while (isActive) {
+                    runCycle()
+                }
+            } finally {
+                _breathingState.value = BreathingData(BreathingPhase.IDLE, 0f, 0)
             }
         }
     }
@@ -50,9 +54,7 @@ class BreathingManager(context: Context) {
     private suspend fun runCycle() {
         runPhase(BreathingPhase.INHALE, DURATION_INHALE, 0f, 1f, useHaptics = true)
         runPhase(BreathingPhase.HOLD_FULL, DURATION_HOLD_FULL, 1f, 1f)
-
         haptics.veryHigh()
-
         runPhase(BreathingPhase.EXHALE, DURATION_EXHALE, 1f, 0f)
         runPhase(BreathingPhase.HOLD_EMPTY, DURATION_HOLD_EMPTY, 0f, 0f)
     }
@@ -80,7 +82,9 @@ class BreathingManager(context: Context) {
             val currentProgress = startVal + (endVal - startVal) * fraction
             val secondsLeft = ceil((duration - elapsedTime) / 1000.0).toInt().coerceAtLeast(1)
 
-            _breathingState.value = BreathingData(phase, currentProgress, secondsLeft)
+            if (currentCoroutineContext().isActive) {
+                _breathingState.value = BreathingData(phase, currentProgress, secondsLeft)
+            }
             delay(FRAME_RATE_MS)
         }
     }
